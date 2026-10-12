@@ -1,6 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
 :root {
   --sync-failed-red: #fd332d;
-  --sync-capsule-bg: #f4f4f4;
+  --sync-failed-capsule-bg: #f8efed;
+  --sync-failed-capsule-border: #f0e3e0;
+  --sync-syncing-capsule-bg: #f4f4f4;
+  --sync-syncing-capsule-border: #ebebeb;
   --sync-text-dark: #000000;
   --sync-btn-black: #000000;
   --sync-font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", "Plus Jakarta Sans", sans-serif;
@@ -26,14 +31,15 @@
   --gap: 20px;
   --font-size: 42px;
   --letter-spacing: -0.03em;
-  --icon-slot-w: 46px;
+  --icon-slot-failed-w: 46px;
+  --icon-slot-syncing-w: 38px;
   --icon-slot-h: 44px;
   --spinner-size: 38px;
   --pad-left: 37px;
   --pad-right-failed: 52px;
   --pad-right-syncing: 51px;
   --icon-margin-failed: 23px;
-  --icon-margin-syncing: 32px;
+  --icon-margin-syncing: 31px;
 
   height: var(--cap-h);
 }
@@ -48,14 +54,15 @@
   --gap: 11px;
   --font-size: 22px;
   --letter-spacing: -0.03em;
-  --icon-slot-w: 24px;
+  --icon-slot-failed-w: 24px;
+  --icon-slot-syncing-w: 20px;
   --icon-slot-h: 24px;
   --spinner-size: 20px;
   --pad-left: 20px;
   --pad-right-failed: 28px;
   --pad-right-syncing: 27px;
   --icon-margin-failed: 12px;
-  --icon-margin-syncing: 17px;
+  --icon-margin-syncing: 16px;
 }
 
 .sync-status-wrapper.scale-original {
@@ -68,25 +75,27 @@
   --btn-size: 144px;
   --gap: 24px;
   --font-size: 50px;
-  --letter-spacing: -0.03em;
-  --icon-slot-w: 55px;
+  --letter-spacing: -0.032em;
+  --icon-slot-failed-w: 55px;
+  --icon-slot-syncing-w: 45px;
   --icon-slot-h: 53px;
   --spinner-size: 45px;
   --pad-left: 44px;
   --pad-right-failed: 62px;
   --pad-right-syncing: 61px;
-  --icon-margin-failed: 28px;
-  --icon-margin-syncing: 38px;
+  --icon-margin-failed: 26px;
+  --icon-margin-syncing: 33px;
 }
 
+/* Pill-shaped Capsule */
 .sync-capsule {
   position: relative;
   height: var(--cap-h);
   width: var(--cap-failed-w);
   border-radius: var(--cap-radius);
-  background-color: var(--sync-capsule-bg);
-  box-shadow: none;
-  border: none;
+  background-color: var(--sync-failed-capsule-bg);
+  border: 1.5px solid var(--sync-failed-capsule-border);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
   display: flex;
   align-items: center;
   padding-left: var(--pad-left);
@@ -94,34 +103,47 @@
   overflow: hidden;
   cursor: default;
   transition: width 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
-              padding-right 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
+              padding-right 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background-color 0.35s ease,
+              border-color 0.35s ease;
   will-change: width;
 }
 
+/* Syncing State of Capsule */
 .sync-capsule.syncing {
   width: var(--cap-syncing-w);
   padding-right: var(--pad-right-syncing);
+  background-color: var(--sync-syncing-capsule-bg);
+  border-color: var(--sync-syncing-capsule-border);
 }
 
+/* Icon Slot */
 .sync-icon-slot {
   position: relative;
-  width: var(--icon-slot-w);
+  width: var(--icon-slot-failed-w);
   height: var(--icon-slot-h);
   flex-shrink: 0;
   margin-right: var(--icon-margin-failed);
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: margin-right 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
+  justify-content: flex-start;
+  transition: width 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
+              margin-right 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .sync-capsule.syncing .sync-icon-slot {
+  width: var(--icon-slot-syncing-w);
   margin-right: var(--icon-margin-syncing);
 }
 
+/* Red Octagon Stop Sign */
 .sync-octagon-icon {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: var(--icon-slot-failed-w);
+  height: var(--icon-slot-h);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,25 +158,29 @@
 
 .sync-capsule.syncing .sync-octagon-icon {
   opacity: 0;
-  transform: scale(0.3) rotate(-45deg);
+  transform: translateY(-50%) scale(0.3) rotate(-45deg);
   pointer-events: none;
 }
 
+/* 8-Dot Chase Spinner */
 .sync-spinner-icon {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%) scale(0.3) rotate(45deg);
+  width: var(--spinner-size);
+  height: var(--spinner-size);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transform: scale(0.3) rotate(45deg);
   transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.44s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .sync-capsule.syncing .sync-spinner-icon {
   opacity: 1;
-  transform: scale(1) rotate(0deg);
+  transform: translateY(-50%) scale(1) rotate(0deg);
 }
 
 .sync-spinner-svg {
@@ -168,6 +194,7 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Text Slot */
 .sync-text-slot {
   position: relative;
   height: calc(var(--cap-h) * 0.35);
@@ -217,6 +244,7 @@
   filter: blur(0px);
 }
 
+/* Circular Retry Button */
 .sync-button-slot {
   position: relative;
   display: inline-flex;
@@ -245,22 +273,25 @@
   background-color: var(--sync-btn-black);
   border: none;
   outline: none;
-  box-shadow: none;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   padding: 0;
-  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .sync-retry-btn:hover {
   transform: scale(1.02);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .sync-retry-btn:active, .sync-retry-btn.pressed {
   transform: scale(0.91);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .sync-button-slot.hidden .sync-retry-btn {

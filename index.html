@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -19,7 +21,10 @@
     :root {
       --bg-color: #fefefe;
       --failed-red: #fd332d;
-      --capsule-bg: #f4f4f4;
+      --failed-capsule-bg: #f8efed;
+      --failed-capsule-border: #f0e3e0;
+      --syncing-capsule-bg: #f4f4f4;
+      --syncing-capsule-border: #ebebeb;
       --text-dark: #000000;
       --btn-black: #000000;
       --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", "Plus Jakarta Sans", sans-serif;
@@ -36,6 +41,7 @@
       justify-content: center;
       overflow-x: hidden;
       user-select: none;
+      padding: 20px 0;
     }
 
     /* Outer Presentation Stage */
@@ -43,10 +49,29 @@
       position: relative;
       width: 100%;
       max-width: 960px;
-      height: 600px;
+      height: 520px;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: var(--bg-color);
+    }
+
+    /* Reference keyframe overlay (for 1:1 pixel verification) */
+    .reference-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 960px;
+      height: 960px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 50;
+      transition: opacity 0.2s ease;
+    }
+
+    .reference-overlay.visible {
+      opacity: 0.5;
     }
 
     /* Container for the interacting group */
@@ -55,6 +80,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
+      z-index: 10;
 
       /* Medium scale default: 120px height */
       --base-h: 120px;
@@ -66,14 +92,15 @@
       --gap: 20px;
       --font-size: 42px;
       --letter-spacing: -0.03em;
-      --icon-slot-w: 46px;
+      --icon-slot-failed-w: 46px;
+      --icon-slot-syncing-w: 38px;
       --icon-slot-h: 44px;
       --spinner-size: 38px;
       --pad-left: 37px;
       --pad-right-failed: 52px;
       --pad-right-syncing: 51px;
       --icon-margin-failed: 23px;
-      --icon-margin-syncing: 32px;
+      --icon-margin-syncing: 31px;
 
       height: var(--cap-h);
       transition: all 0.3s ease;
@@ -90,14 +117,15 @@
       --gap: 11px;
       --font-size: 22px;
       --letter-spacing: -0.03em;
-      --icon-slot-w: 24px;
+      --icon-slot-failed-w: 24px;
+      --icon-slot-syncing-w: 20px;
       --icon-slot-h: 24px;
       --spinner-size: 20px;
       --pad-left: 20px;
       --pad-right-failed: 28px;
       --pad-right-syncing: 27px;
       --icon-margin-failed: 12px;
-      --icon-margin-syncing: 17px;
+      --icon-margin-syncing: 16px;
     }
 
     .interaction-stage.scale-original {
@@ -110,15 +138,16 @@
       --btn-size: 144px;
       --gap: 24px;
       --font-size: 50px;
-      --letter-spacing: -0.03em;
-      --icon-slot-w: 55px;
+      --letter-spacing: -0.032em;
+      --icon-slot-failed-w: 55px;
+      --icon-slot-syncing-w: 45px;
       --icon-slot-h: 53px;
       --spinner-size: 45px;
       --pad-left: 44px;
       --pad-right-failed: 62px;
       --pad-right-syncing: 61px;
-      --icon-margin-failed: 28px;
-      --icon-margin-syncing: 38px;
+      --icon-margin-failed: 26px;
+      --icon-margin-syncing: 33px;
     }
 
     /* Pill-shaped Capsule */
@@ -127,9 +156,9 @@
       height: var(--cap-h);
       width: var(--cap-failed-w);
       border-radius: var(--cap-radius);
-      background-color: var(--capsule-bg);
-      border: none;
-      box-shadow: none;
+      background-color: var(--failed-capsule-bg);
+      border: 1.5px solid var(--failed-capsule-border);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
       display: flex;
       align-items: center;
       padding-left: var(--pad-left);
@@ -137,7 +166,9 @@
       overflow: hidden;
       cursor: default;
       transition: width 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  padding-right 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
+                  padding-right 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  background-color 0.35s ease,
+                  border-color 0.35s ease;
       will-change: width;
     }
 
@@ -145,29 +176,37 @@
     .capsule.syncing {
       width: var(--cap-syncing-w);
       padding-right: var(--pad-right-syncing);
+      background-color: var(--syncing-capsule-bg);
+      border-color: var(--syncing-capsule-border);
     }
 
     /* Icon Slot inside capsule */
     .icon-slot {
       position: relative;
-      width: var(--icon-slot-w);
+      width: var(--icon-slot-failed-w);
       height: var(--icon-slot-h);
       flex-shrink: 0;
       margin-right: var(--icon-margin-failed);
       display: flex;
       align-items: center;
-      justify-content: center;
-      transition: margin-right 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
+      justify-content: flex-start;
+      transition: width 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  margin-right 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .capsule.syncing .icon-slot {
+      width: var(--icon-slot-syncing-w);
       margin-right: var(--icon-margin-syncing);
     }
 
     /* Octagon Stop Sign */
     .octagon-icon {
       position: absolute;
-      inset: 0;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      width: var(--icon-slot-failed-w);
+      height: var(--icon-slot-h);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -182,26 +221,29 @@
 
     .capsule.syncing .octagon-icon {
       opacity: 0;
-      transform: scale(0.3) rotate(-45deg);
+      transform: translateY(-50%) scale(0.3) rotate(-45deg);
       pointer-events: none;
     }
 
     /* 8-Dot Chase Spinner */
     .spinner-icon {
       position: absolute;
-      inset: 0;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%) scale(0.3) rotate(45deg);
+      width: var(--spinner-size);
+      height: var(--spinner-size);
       display: flex;
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transform: scale(0.3) rotate(45deg);
       transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
                   transform 0.44s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .capsule.syncing .spinner-icon {
       opacity: 1;
-      transform: scale(1) rotate(0deg);
+      transform: translateY(-50%) scale(1) rotate(0deg);
     }
 
     .spinner-svg {
@@ -294,22 +336,25 @@
       background-color: var(--btn-black);
       border: none;
       outline: none;
-      box-shadow: none;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.06);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       padding: 0;
-      transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.2s ease;
       -webkit-tap-highlight-color: transparent;
     }
 
     .retry-btn:hover {
       transform: scale(1.02);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     .retry-btn:active, .retry-btn.pressed {
       transform: scale(0.91);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     }
 
     .button-slot.hidden .retry-btn {
@@ -351,12 +396,12 @@
 
     /* Control Tray */
     .controls-panel {
-      margin-top: 24px;
+      margin-top: 18px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       padding: 10px 20px;
       border-radius: 999px;
       background: #ffffff;
@@ -409,8 +454,70 @@
       background: #10b981;
     }
 
+    /* Frame Inspector Panel */
+    .inspector-panel {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: #fafafa;
+      border: 1px solid #ebebeb;
+      border-radius: 16px;
+      padding: 12px 20px;
+      max-width: 960px;
+      width: 90%;
+    }
+
+    .inspector-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .inspector-stepper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .frame-btn {
+      background: #ffffff;
+      border: 1px solid #dcdcdc;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .frame-btn:hover {
+      background: #f0f0f0;
+    }
+
+    .frame-btn.active {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
+    }
+
+    .inspector-info {
+      font-size: 12px;
+      color: #777;
+      text-align: center;
+      min-height: 18px;
+    }
+
     .meta-credits {
-      margin-top: 18px;
+      margin-top: 14px;
       font-size: 13px;
       color: #888;
       text-align: center;
@@ -426,7 +533,10 @@
 <body>
 
   <div class="viewport-canvas">
-    <div class="interaction-stage" id="stage">
+    <!-- Keyframe Reference Image Overlay -->
+    <img class="reference-overlay" id="refOverlay" src="reference_frames/frame_001.png" alt="Reference Keyframe">
+
+    <div class="interaction-stage scale-original" id="stage">
       
       <!-- Pill-shaped Capsule -->
       <div class="capsule" id="capsule">
@@ -489,8 +599,34 @@
 
     <button id="triggerBtn">Click Retry</button>
     <button id="replayDemoBtn">Replay Video Demo</button>
-    <button id="scaleBtn">Scale: Medium (120px)</button>
+    <button id="scaleBtn">Scale: Original (144px)</button>
     <button id="autoLoopBtn">Auto Loop: OFF</button>
+  </div>
+
+  <!-- Frame Inspector: Compare Live Component Against Keyframes -->
+  <div class="inspector-panel">
+    <div class="inspector-header">
+      <span>FRAME INSPECTOR (1:1 Keyframe Parity Checker)</span>
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+        <input type="checkbox" id="overlayToggle"> 50% Reference Overlay
+      </label>
+    </div>
+
+    <div class="inspector-stepper">
+      <button class="frame-btn active" data-frame="1">F1: Idle Failed</button>
+      <button class="frame-btn" data-frame="2">F2: Early Sync</button>
+      <button class="frame-btn" data-frame="3">F3: Mid Sync</button>
+      <button class="frame-btn" data-frame="4">F4: Settled Sync</button>
+      <button class="frame-btn" data-frame="5">F5: Spring Overshoot</button>
+      <button class="frame-btn" data-frame="6">F6: Settled Failed</button>
+      <button class="frame-btn" data-frame="7">F7: Cycle 2 Sync</button>
+      <button class="frame-btn" data-frame="8">F8: Cycle 2 Spin</button>
+      <button class="frame-btn" data-frame="9">F9: Cycle 2 Hold</button>
+    </div>
+
+    <div class="inspector-info" id="inspectorInfo">
+      Frame 1 (video 0.02s): Resting "Sync Failed" state. Capsule 445x144px, Button 144x144px, Gap 24px, Total 615px, Center X=480.0px.
+    </div>
   </div>
 
   <div class="meta-credits">
@@ -498,7 +634,6 @@
   </div>
 
   <script>
-    // Finite state machine
     const STATES = {
       FAILED: 'FAILED',
       SYNCING: 'SYNCING'
@@ -507,7 +642,7 @@
     let currentState = STATES.FAILED;
     let autoLoop = false;
     let autoLoopTimer = null;
-    let currentScale = 'medium'; // 'compact' (64px), 'medium' (120px), 'original' (144px)
+    let currentScale = 'original';
 
     const stage = document.getElementById('stage');
     const capsule = document.getElementById('capsule');
@@ -520,6 +655,22 @@
     const scaleBtn = document.getElementById('scaleBtn');
     const autoLoopBtn = document.getElementById('autoLoopBtn');
     const simCursor = document.getElementById('simCursor');
+    const refOverlay = document.getElementById('refOverlay');
+    const overlayToggle = document.getElementById('overlayToggle');
+    const inspectorInfo = document.getElementById('inspectorInfo');
+    const frameButtons = document.querySelectorAll('.frame-btn');
+
+    const FRAME_DATA = {
+      1: { state: STATES.FAILED, desc: 'Frame 1 (video 0.02s): Resting "Sync Failed" state. Capsule 445x144px, Button 144x144px, Gap 24px, Total 615px, Center X=480.0px.' },
+      2: { state: STATES.SYNCING, desc: 'Frame 2 (video 1.02s): Early syncing. Button collapsed into capsule, 8-dot spinner active, capsule width contracting.' },
+      3: { state: STATES.SYNCING, desc: 'Frame 3 (video 2.02s): Syncing mid-hold. Capsule width 368px, spinner rotating.' },
+      4: { state: STATES.SYNCING, desc: 'Frame 4 (video 3.02s): Settled syncing state. Capsule 368x144px, centered at X=478.5px, button hidden.' },
+      5: { state: STATES.FAILED, desc: 'Frame 5 (video 4.02s): SPRING RETURN MAX OVERSHOOT! Group width expands to 648px (+33px), gap opens to 48px, capsule reaches 456px.' },
+      6: { state: STATES.FAILED, desc: 'Frame 6 (video 5.02s): Settled "Sync Failed" state after damped return oscillation. Width settles to 615px.' },
+      7: { state: STATES.SYNCING, desc: 'Frame 7 (video 6.02s): Cycle 2 Syncing state after second click.' },
+      8: { state: STATES.SYNCING, desc: 'Frame 8 (video 7.02s): Cycle 2 Syncing steady state with 8-dot chaser.' },
+      9: { state: STATES.SYNCING, desc: 'Frame 9 (video 8.02s): Cycle 2 Syncing hold before second recovery.' }
+    };
 
     function setState(nextState) {
       if (currentState === nextState) return;
@@ -577,30 +728,72 @@
       }
     });
 
-    // Scale switcher: Compact (64px) -> Medium (120px) -> Original (144px)
+    // Scale switcher
     scaleBtn.addEventListener('click', () => {
       stage.classList.remove('scale-compact', 'scale-original');
-      if (currentScale === 'medium') {
-        currentScale = 'original';
-        stage.classList.add('scale-original');
-        scaleBtn.textContent = 'Scale: Original (144px)';
-      } else if (currentScale === 'original') {
+      if (currentScale === 'original') {
         currentScale = 'compact';
         stage.classList.add('scale-compact');
         scaleBtn.textContent = 'Scale: Compact (64px)';
-      } else {
+      } else if (currentScale === 'compact') {
         currentScale = 'medium';
+        stage.classList.add('scale-medium');
         scaleBtn.textContent = 'Scale: Medium (120px)';
+      } else {
+        currentScale = 'original';
+        stage.classList.add('scale-original');
+        scaleBtn.textContent = 'Scale: Original (144px)';
       }
+    });
+
+    // Reference overlay toggle
+    overlayToggle.addEventListener('change', () => {
+      refOverlay.classList.toggle('visible', overlayToggle.checked);
+    });
+
+    // Frame stepper buttons
+    frameButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        frameButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const frameNum = parseInt(btn.dataset.frame, 10);
+        refOverlay.src = `reference_frames/frame_00${frameNum}.png`;
+        const data = FRAME_DATA[frameNum];
+        inspectorInfo.textContent = data.desc;
+
+        // Force scale to original for 1:1 overlay inspection
+        if (currentScale !== 'original') {
+          currentScale = 'original';
+          stage.classList.remove('scale-compact');
+          stage.classList.add('scale-original');
+          scaleBtn.textContent = 'Scale: Original (144px)';
+        }
+
+        // Apply corresponding state
+        if (data.state === STATES.SYNCING && currentState !== STATES.SYNCING) {
+          capsule.classList.add('syncing');
+          buttonSlot.classList.add('hidden');
+          currentState = STATES.SYNCING;
+          stateDot.classList.add('active');
+          stateLabel.textContent = 'State: Syncing (Frame Preview)';
+        } else if (data.state === STATES.FAILED && currentState !== STATES.FAILED) {
+          capsule.classList.remove('syncing');
+          buttonSlot.classList.remove('hidden');
+          currentState = STATES.FAILED;
+          stateDot.classList.remove('active');
+          stateLabel.textContent = 'State: Sync Failed (Frame Preview)';
+        }
+      });
     });
 
     // Replay full video demo choreography with simulated cursor
     replayDemoBtn.addEventListener('click', () => {
       if (currentState === STATES.SYNCING) {
-        setState(STATES.FAILED);
+        capsule.classList.remove('syncing');
+        buttonSlot.classList.remove('hidden');
+        currentState = STATES.FAILED;
       }
 
-      // Position cursor at bottom right
       const rect = retryBtn.getBoundingClientRect();
       const canvasRect = document.querySelector('.viewport-canvas').getBoundingClientRect();
       

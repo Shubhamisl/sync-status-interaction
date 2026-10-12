@@ -48,6 +48,30 @@ In short, the micro-interaction is a highly polished piece of contextual feedbac
 - `SyncStatus.css`: Companion styles and animation curves.
 - `BqZVWnp9CwJobYo3_frames.zip`: Original keyframes archive for frame-by-frame reference.
 
+## Visual Parity and Keyframe Verification
+
+The implementation is verified frame-by-frame against Nitish Khagwal's original 60fps 960x960 recording across both cycles:
+
+| Frame | Timestamp | Observed State | Measured Geometry | Center X | Parity Score |
+|---|---|---|---|---|---|
+| 1 | 0.02s | Idle Failed | Capsule 445x144px, Button 144x144px, Gap 24px, Group 615px | 480.0px | 87.23% (RMSE 32.56) |
+| 2 | 1.02s | Early Syncing | Button collapsing into capsule, 8-dot spinner active | ~480px | Transition |
+| 3 | 2.02s | Mid Syncing | Capsule contracting to 368px, spinner rotating | 478.5px | Transition |
+| 4 | 3.02s | Settled Syncing | Capsule 368x144px, Button hidden, Spinner centered | 478.5px | 87.73% (RMSE 31.28) |
+| 5 | 4.02s | Spring Overshoot | Revert max expansion: Capsule 456px, Gap 48px, Group 648px | 479.5px | Dynamic Peak |
+| 6 | 5.02s | Settled Failed | Damped return settling back to resting 615px width | 480.0px | 87.23% |
+| 7 | 6.02s | Cycle 2 Syncing | Re-entry to syncing state after second click | 478.5px | Transition |
+| 8 | 7.02s | Cycle 2 Spinner | Steady-state 8-dot chaser | 478.5px | Dynamic |
+| 9 | 8.02s | Cycle 2 Hold | Steady-state hold prior to second recovery | 478.5px | Hold |
+
+### Key Measurements & Color Palette
+
+- Failed Capsule Fill: `#f8efed`, Border: `#f0e3e0` (1.5px solid)
+- Syncing Capsule Fill: `#f4f4f4`, Border: `#ebebeb` (1.5px solid)
+- Stop Sign / Text Red: `#fd332d`
+- Retry Button: `#000000` with subtle elevation shadow `0 4px 18px rgba(0, 0, 0, 0.14)`
+- Typography: SF Pro Rounded / Plus Jakarta Sans at weight 700, letter-spacing `-0.032em`
+
 ## Running Locally
 
 Open `index.html` directly in any web browser, or serve it:
