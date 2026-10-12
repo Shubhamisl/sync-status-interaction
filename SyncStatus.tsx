@@ -57,26 +57,26 @@ export const SyncStatus: React.FC<SyncStatusProps> = ({
                 strokeLinejoin="round"
               />
               <path
-                d="M27.5 15V29"
+                d="M27.5 14V29"
                 stroke="#FFFFFF"
-                strokeWidth="4.4"
+                strokeWidth="5"
                 strokeLinecap="round"
               />
-              <circle cx="27.5" cy="37.5" r="2.8" fill="#FFFFFF" />
+              <circle cx="27.5" cy="36.5" r="2.6" fill="#FFFFFF" />
             </svg>
           </div>
 
           {/* Dotted Chase Spinner */}
           <div className="sync-spinner-icon">
             <svg className="sync-spinner-svg" viewBox="0 0 45 45" fill="none">
-              <circle cx="22.5" cy="5.5" r="3.2" fill="#000000" fillOpacity="1.00" />
-              <circle cx="34.5" cy="10.5" r="3.2" fill="#000000" fillOpacity="0.87" />
-              <circle cx="39.5" cy="22.5" r="3.2" fill="#000000" fillOpacity="0.75" />
-              <circle cx="34.5" cy="34.5" r="3.2" fill="#000000" fillOpacity="0.62" />
-              <circle cx="22.5" cy="39.5" r="3.2" fill="#000000" fillOpacity="0.50" />
-              <circle cx="10.5" cy="34.5" r="3.2" fill="#000000" fillOpacity="0.37" />
-              <circle cx="5.5" cy="22.5" r="3.2" fill="#000000" fillOpacity="0.25" />
-              <circle cx="10.5" cy="10.5" r="3.2" fill="#000000" fillOpacity="0.12" />
+              <circle cx="22.5" cy="6.5" r="3.3" fill="#000000" fillOpacity="1.00" />
+              <circle cx="33.8" cy="11.2" r="3.3" fill="#000000" fillOpacity="0.87" />
+              <circle cx="38.5" cy="22.5" r="3.3" fill="#000000" fillOpacity="0.75" />
+              <circle cx="33.8" cy="33.8" r="3.3" fill="#000000" fillOpacity="0.62" />
+              <circle cx="22.5" cy="38.5" r="3.3" fill="#000000" fillOpacity="0.50" />
+              <circle cx="11.2" cy="33.8" r="3.3" fill="#000000" fillOpacity="0.37" />
+              <circle cx="6.5" cy="22.5" r="3.3" fill="#000000" fillOpacity="0.25" />
+              <circle cx="11.2" cy="11.2" r="3.3" fill="#000000" fillOpacity="0.12" />
             </svg>
           </div>
         </div>

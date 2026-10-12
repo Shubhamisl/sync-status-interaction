@@ -19,18 +19,15 @@
     :root {
       --bg-color: #fefefe;
       --failed-red: #fd332d;
-      --failed-capsule-bg: #f8efed;
-      --failed-capsule-border: #f0e3e0;
-      --syncing-capsule-bg: #f4f4f4;
-      --syncing-capsule-border: #ebebeb;
-      --syncing-text: #050505;
+      --capsule-bg: #f4f4f4;
+      --text-dark: #000000;
       --btn-black: #000000;
       --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", "Plus Jakarta Sans", sans-serif;
     }
 
     body {
       background-color: var(--bg-color);
-      color: #050505;
+      color: #000000;
       font-family: var(--font-family);
       min-height: 100vh;
       display: flex;
@@ -41,7 +38,7 @@
       user-select: none;
     }
 
-    /* Outer Presentation Stage: 960x960 maximum bounds matching original video */
+    /* Outer Presentation Stage */
     .viewport-canvas {
       position: relative;
       width: 100%;
@@ -58,82 +55,113 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      /* Full scale defaults: based on 144px height */
-      --stage-h: 120px;
-      --cap-failed-w: 372px;
-      --cap-syncing-w: 308px;
+
+      /* Medium scale default: 120px height */
+      --base-h: 120px;
+      --cap-h: 120px;
+      --cap-radius: 60px;
+      --cap-failed-w: 371px;
+      --cap-syncing-w: 307px;
       --btn-size: 120px;
-      --gap: 22px;
-      --font-size: 38px;
-      --icon-size: 46px;
+      --gap: 20px;
+      --font-size: 42px;
+      --letter-spacing: -0.03em;
+      --icon-slot-w: 46px;
+      --icon-slot-h: 44px;
       --spinner-size: 38px;
-      --border-radius: 60px;
-      height: var(--stage-h);
+      --pad-left: 37px;
+      --pad-right-failed: 52px;
+      --pad-right-syncing: 51px;
+      --icon-margin-failed: 23px;
+      --icon-margin-syncing: 32px;
+
+      height: var(--cap-h);
       transition: all 0.3s ease;
     }
 
     /* Scaled modes */
     .interaction-stage.scale-compact {
-      --stage-h: 64px;
-      --cap-failed-w: 196px;
-      --cap-syncing-w: 163px;
+      --base-h: 64px;
+      --cap-h: 64px;
+      --cap-radius: 32px;
+      --cap-failed-w: 198px;
+      --cap-syncing-w: 164px;
       --btn-size: 64px;
-      --gap: 12px;
-      --font-size: 20px;
-      --icon-size: 24px;
+      --gap: 11px;
+      --font-size: 22px;
+      --letter-spacing: -0.03em;
+      --icon-slot-w: 24px;
+      --icon-slot-h: 24px;
       --spinner-size: 20px;
-      --border-radius: 32px;
+      --pad-left: 20px;
+      --pad-right-failed: 28px;
+      --pad-right-syncing: 27px;
+      --icon-margin-failed: 12px;
+      --icon-margin-syncing: 17px;
     }
 
     .interaction-stage.scale-original {
-      --stage-h: 144px;
-      --cap-failed-w: 442px;
-      --cap-syncing-w: 364px;
+      /* 1:1 pixel match with 960x960 reference frames */
+      --base-h: 144px;
+      --cap-h: 144px;
+      --cap-radius: 72px;
+      --cap-failed-w: 445px;
+      --cap-syncing-w: 368px;
       --btn-size: 144px;
-      --gap: 26px;
-      --font-size: 46px;
-      --icon-size: 54px;
+      --gap: 24px;
+      --font-size: 50px;
+      --letter-spacing: -0.03em;
+      --icon-slot-w: 55px;
+      --icon-slot-h: 53px;
       --spinner-size: 45px;
-      --border-radius: 72px;
+      --pad-left: 44px;
+      --pad-right-failed: 62px;
+      --pad-right-syncing: 61px;
+      --icon-margin-failed: 28px;
+      --icon-margin-syncing: 38px;
     }
 
     /* Pill-shaped Capsule */
     .capsule {
       position: relative;
-      height: var(--stage-h);
+      height: var(--cap-h);
       width: var(--cap-failed-w);
-      border-radius: var(--border-radius);
-      background-color: var(--failed-capsule-bg);
-      border: 1.5px solid var(--failed-capsule-border);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      border-radius: var(--cap-radius);
+      background-color: var(--capsule-bg);
+      border: none;
+      box-shadow: none;
       display: flex;
       align-items: center;
-      padding: 0 calc(var(--stage-h) * 0.28) 0 calc(var(--stage-h) * 0.24);
+      padding-left: var(--pad-left);
+      padding-right: var(--pad-right-failed);
       overflow: hidden;
       cursor: default;
       transition: width 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  background-color 0.35s ease,
-                  border-color 0.35s ease;
-      will-change: width, transform;
+                  padding-right 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
+      will-change: width;
     }
 
     /* Syncing State of Capsule */
     .capsule.syncing {
       width: var(--cap-syncing-w);
-      background-color: var(--syncing-capsule-bg);
-      border-color: var(--syncing-capsule-border);
+      padding-right: var(--pad-right-syncing);
     }
 
     /* Icon Slot inside capsule */
     .icon-slot {
       position: relative;
-      width: var(--icon-size);
-      height: var(--icon-size);
+      width: var(--icon-slot-w);
+      height: var(--icon-slot-h);
       flex-shrink: 0;
-      margin-right: calc(var(--stage-h) * 0.16);
+      margin-right: var(--icon-margin-failed);
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: margin-right 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .capsule.syncing .icon-slot {
+      margin-right: var(--icon-margin-syncing);
     }
 
     /* Octagon Stop Sign */
@@ -143,8 +171,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-                  transform 0.46s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.44s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .octagon-svg {
@@ -154,7 +182,7 @@
 
     .capsule.syncing .octagon-icon {
       opacity: 0;
-      transform: scale(0.35) rotate(-55deg);
+      transform: scale(0.3) rotate(-45deg);
       pointer-events: none;
     }
 
@@ -166,9 +194,9 @@
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transform: scale(0.35) rotate(55deg);
-      transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-                  transform 0.46s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: scale(0.3) rotate(45deg);
+      transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.44s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .capsule.syncing .spinner-icon {
@@ -179,7 +207,7 @@
     .spinner-svg {
       width: var(--spinner-size);
       height: var(--spinner-size);
-      animation: spin-chase 1.05s steps(8, end) infinite;
+      animation: spin-chase 0.9s steps(8, end) infinite;
     }
 
     @keyframes spin-chase {
@@ -190,7 +218,7 @@
     /* Text Container */
     .text-slot {
       position: relative;
-      height: calc(var(--stage-h) * 0.42);
+      height: calc(var(--cap-h) * 0.35);
       display: flex;
       align-items: center;
       flex-grow: 1;
@@ -202,11 +230,12 @@
       left: 0;
       font-size: var(--font-size);
       font-weight: 700;
-      letter-spacing: -0.024em;
+      letter-spacing: var(--letter-spacing);
+      line-height: 1;
       white-space: nowrap;
-      transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+      transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
                   transform 0.44s cubic-bezier(0.34, 1.4, 0.64, 1),
-                  filter 0.32s ease;
+                  filter 0.28s ease;
     }
 
     .text-failed {
@@ -224,7 +253,7 @@
     }
 
     .text-syncing {
-      color: var(--syncing-text);
+      color: var(--text-dark);
       opacity: 0;
       transform: translateY(20px) scale(0.92);
       filter: blur(4px);
@@ -244,9 +273,10 @@
       justify-content: center;
       margin-left: var(--gap);
       width: var(--btn-size);
+      height: var(--btn-size);
       transition: width 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
                   margin-left 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  opacity 0.36s ease;
+                  opacity 0.32s ease;
       will-change: width, margin-left;
     }
 
@@ -260,44 +290,41 @@
     .retry-btn {
       width: var(--btn-size);
       height: var(--btn-size);
-      border-radius: 50%;
+      border-radius: var(--cap-radius);
       background-color: var(--btn-black);
       border: none;
       outline: none;
+      box-shadow: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.06);
-      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  box-shadow 0.2s ease,
-                  background-color 0.2s ease;
+      padding: 0;
+      transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
       -webkit-tap-highlight-color: transparent;
     }
 
     .retry-btn:hover {
-      background-color: #171717;
-      transform: scale(1.03);
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+      transform: scale(1.02);
     }
 
     .retry-btn:active, .retry-btn.pressed {
       transform: scale(0.91);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
     .button-slot.hidden .retry-btn {
-      transform: scale(0.2) rotate(-90deg);
+      transform: scale(0.15) rotate(-90deg);
     }
 
     .retry-icon-svg {
-      width: calc(var(--btn-size) * 0.38);
-      height: calc(var(--btn-size) * 0.38);
+      width: calc(var(--btn-size) * (54 / 144));
+      height: calc(var(--btn-size) * (54 / 144));
       fill: none;
       stroke: #ffffff;
-      stroke-width: 3.4;
+      stroke-width: 2.6;
       stroke-linecap: round;
       stroke-linejoin: round;
+      display: block;
       transition: transform 0.3s ease;
     }
 
@@ -408,22 +435,22 @@
           <div class="octagon-icon" id="octagonIcon">
             <svg class="octagon-svg" viewBox="0 0 55 53" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M16 2H39L53 16V37L39 51H16L2 37V16L16 2Z" fill="#FD332D" stroke="#E62822" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M27.5 15V29" stroke="#FFFFFF" stroke-width="4.4" stroke-linecap="round"/>
-              <circle cx="27.5" cy="37.5" r="2.8" fill="#FFFFFF"/>
+              <path d="M27.5 14V29" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="27.5" cy="36.5" r="2.6" fill="#FFFFFF"/>
             </svg>
           </div>
 
           <!-- Dotted Chase Spinner (8 dots stepping in opacity) -->
           <div class="spinner-icon" id="spinnerIcon">
             <svg class="spinner-svg" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="22.5" cy="5.5" r="3.2" fill="#000000" fill-opacity="1.00"/>
-              <circle cx="34.5" cy="10.5" r="3.2" fill="#000000" fill-opacity="0.87"/>
-              <circle cx="39.5" cy="22.5" r="3.2" fill="#000000" fill-opacity="0.75"/>
-              <circle cx="34.5" cy="34.5" r="3.2" fill="#000000" fill-opacity="0.62"/>
-              <circle cx="22.5" cy="39.5" r="3.2" fill="#000000" fill-opacity="0.50"/>
-              <circle cx="10.5" cy="34.5" r="3.2" fill="#000000" fill-opacity="0.37"/>
-              <circle cx="5.5" cy="22.5" r="3.2" fill="#000000" fill-opacity="0.25"/>
-              <circle cx="10.5" cy="10.5" r="3.2" fill="#000000" fill-opacity="0.12"/>
+              <circle cx="22.5" cy="6.5" r="3.3" fill="#000000" fill-opacity="1.00"/>
+              <circle cx="33.8" cy="11.2" r="3.3" fill="#000000" fill-opacity="0.87"/>
+              <circle cx="38.5" cy="22.5" r="3.3" fill="#000000" fill-opacity="0.75"/>
+              <circle cx="33.8" cy="33.8" r="3.3" fill="#000000" fill-opacity="0.62"/>
+              <circle cx="22.5" cy="38.5" r="3.3" fill="#000000" fill-opacity="0.50"/>
+              <circle cx="11.2" cy="33.8" r="3.3" fill="#000000" fill-opacity="0.37"/>
+              <circle cx="6.5" cy="22.5" r="3.3" fill="#000000" fill-opacity="0.25"/>
+              <circle cx="11.2" cy="11.2" r="3.3" fill="#000000" fill-opacity="0.12"/>
             </svg>
           </div>
         </div>
