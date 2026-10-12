@@ -1,8 +1,8 @@
 # Sync Status Micro-interaction
 
-A micro-interaction for a sync status badge with fluid shape morphing, elastic physics, and a dotted chase spinner.
+A high-fidelity micro-interaction for contextual feedback with fluid shape morphing, elastic spring physics, and an 8-dot chase spinner.
 
-Based on keyframe breakdown of the failed-to-syncing state transition.
+Based on the contextual feedback interaction by [Nitish Khagwal (@nitishkmrk)](https://x.com/nitishkmrk/status/2083103451719025094).
 
 ## Interaction Description
 
@@ -33,15 +33,18 @@ In short, the micro-interaction is a highly polished piece of contextual feedbac
 ## Features
 
 - Two states: `Sync Failed` and `Syncing`.
-- Fluid morphing pill capsule with spring physics (`cubic-bezier(0.34, 1.56, 0.64, 1)`).
-- Collapsible circular retry button.
-- Dotted ring chase spinner.
+- Exact centering dynamics: the interactive group stays horizontally centered in both idle and active states.
+- Pure CSS spring physics (`cubic-bezier(0.34, 1.56, 0.64, 1)` for morph, `cubic-bezier(0.34, 1.62, 0.64, 1)` for return overshoot).
+- Collapsible circular retry button with click compression physics.
+- 8-dot stepping opacity chase spinner.
+- Replayable macOS cursor choreography demo matching the 9.4s reference video.
+- Multi-scale support: Compact (`64px`), Medium (`120px`), and Original (`144px`).
 - Available as standalone HTML/CSS/JS and as a React TypeScript component.
 
 ## Files
 
-- `index.html`: Standalone browser demonstration with manual trigger and auto-loop simulation.
-- `SyncStatus.tsx`: Reusable React component.
+- `index.html`: Standalone browser demonstration with manual trigger, cursor replay, scale switching, and auto-loop.
+- `SyncStatus.tsx`: Reusable React TypeScript component supporting `compact`, `medium`, and `original` scales.
 - `SyncStatus.css`: Companion styles and animation curves.
 - `BqZVWnp9CwJobYo3_frames.zip`: Original keyframes archive for frame-by-frame reference.
 

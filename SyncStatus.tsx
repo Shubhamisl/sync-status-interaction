@@ -2,24 +2,32 @@ import React, { useState, useEffect } from 'react';
 import './SyncStatus.css';
 
 export type SyncState = 'FAILED' | 'SYNCING';
+export type SyncScale = 'compact' | 'medium' | 'original';
 
 export interface SyncStatusProps {
   initialState?: SyncState;
+  scale?: SyncScale;
   onRetry?: () => void;
   autoRevertDelayMs?: number;
 }
 
 export const SyncStatus: React.FC<SyncStatusProps> = ({
   initialState = 'FAILED',
+  scale = 'medium',
   onRetry,
-  autoRevertDelayMs = 3200,
+  autoRevertDelayMs = 2600,
 }) => {
   const [status, setStatus] = useState<SyncState>(initialState);
+  const [isPressed, setIsPressed] = useState<boolean>(false);
 
   const handleRetry = () => {
     if (status === 'SYNCING') return;
-    setStatus('SYNCING');
-    if (onRetry) onRetry();
+    setIsPressed(true);
+    setTimeout(() => {
+      setIsPressed(false);
+      setStatus('SYNCING');
+      if (onRetry) onRetry();
+    }, 140);
   };
 
   useEffect(() => {
@@ -32,42 +40,43 @@ export const SyncStatus: React.FC<SyncStatusProps> = ({
   }, [status, autoRevertDelayMs]);
 
   const isSyncing = status === 'SYNCING';
+  const scaleClass = scale === 'compact' ? 'scale-compact' : scale === 'original' ? 'scale-original' : '';
 
   return (
-    <div className="sync-status-wrapper">
+    <div className={`sync-status-wrapper ${scaleClass}`}>
       <div className={`sync-capsule ${isSyncing ? 'syncing' : ''}`}>
         <div className="sync-icon-slot">
-          {/* Red Octagon */}
+          {/* Red Octagon Stop-Sign */}
           <div className="sync-octagon-icon">
-            <svg className="sync-octagon-svg" viewBox="0 0 40 40" fill="none">
+            <svg className="sync-octagon-svg" viewBox="0 0 55 53" fill="none">
               <path
-                d="M12.5 3.5H27.5L36.5 12.5V27.5L27.5 36.5H12.5L3.5 27.5V12.5L12.5 3.5Z"
-                fill="#FC3529"
-                stroke="#E62A1F"
-                strokeWidth="1.5"
+                d="M16 2H39L53 16V37L39 51H16L2 37V16L16 2Z"
+                fill="#FD332D"
+                stroke="#E62822"
+                strokeWidth="1.8"
                 strokeLinejoin="round"
               />
               <path
-                d="M20 12V22"
+                d="M27.5 15V29"
                 stroke="#FFFFFF"
-                strokeWidth="3.2"
+                strokeWidth="4.4"
                 strokeLinecap="round"
               />
-              <circle cx="20" cy="28.5" r="2" fill="#FFFFFF" />
+              <circle cx="27.5" cy="37.5" r="2.8" fill="#FFFFFF" />
             </svg>
           </div>
 
-          {/* Dotted Spinner */}
+          {/* Dotted Chase Spinner */}
           <div className="sync-spinner-icon">
-            <svg className="sync-spinner-svg" viewBox="0 0 32 32" fill="none">
-              <circle cx="16" cy="4" r="2.2" fill="#111111" fillOpacity="1.0" />
-              <circle cx="24.48" cy="7.51" r="2.2" fill="#111111" fillOpacity="0.87" />
-              <circle cx="28" cy="16" r="2.2" fill="#111111" fillOpacity="0.75" />
-              <circle cx="24.48" cy="24.48" r="2.2" fill="#111111" fillOpacity="0.62" />
-              <circle cx="16" cy="28" r="2.2" fill="#111111" fillOpacity="0.50" />
-              <circle cx="7.51" cy="24.48" r="2.2" fill="#111111" fillOpacity="0.37" />
-              <circle cx="4" cy="16" r="2.2" fill="#111111" fillOpacity="0.25" />
-              <circle cx="7.51" cy="7.51" r="2.2" fill="#111111" fillOpacity="0.12" />
+            <svg className="sync-spinner-svg" viewBox="0 0 45 45" fill="none">
+              <circle cx="22.5" cy="5.5" r="3.2" fill="#000000" fillOpacity="1.00" />
+              <circle cx="34.5" cy="10.5" r="3.2" fill="#000000" fillOpacity="0.87" />
+              <circle cx="39.5" cy="22.5" r="3.2" fill="#000000" fillOpacity="0.75" />
+              <circle cx="34.5" cy="34.5" r="3.2" fill="#000000" fillOpacity="0.62" />
+              <circle cx="22.5" cy="39.5" r="3.2" fill="#000000" fillOpacity="0.50" />
+              <circle cx="10.5" cy="34.5" r="3.2" fill="#000000" fillOpacity="0.37" />
+              <circle cx="5.5" cy="22.5" r="3.2" fill="#000000" fillOpacity="0.25" />
+              <circle cx="10.5" cy="10.5" r="3.2" fill="#000000" fillOpacity="0.12" />
             </svg>
           </div>
         </div>
@@ -80,7 +89,7 @@ export const SyncStatus: React.FC<SyncStatusProps> = ({
 
       <div className={`sync-button-slot ${isSyncing ? 'hidden' : ''}`}>
         <button
-          className="sync-retry-btn"
+          className={`sync-retry-btn ${isPressed ? 'pressed' : ''}`}
           onClick={handleRetry}
           aria-label="Retry Sync"
         >

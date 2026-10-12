@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sync Status Micro-interaction (Refined Parity)</title>
+  <title>Contextual Feedback Interaction — Nitish Khagwal (@nitishkmrk)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -16,10 +16,22 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
+    :root {
+      --bg-color: #fefefe;
+      --failed-red: #fd332d;
+      --failed-capsule-bg: #f8efed;
+      --failed-capsule-border: #f0e3e0;
+      --syncing-capsule-bg: #f4f4f4;
+      --syncing-capsule-border: #ebebeb;
+      --syncing-text: #050505;
+      --btn-black: #000000;
+      --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", "Plus Jakarta Sans", sans-serif;
+    }
+
     body {
-      background-color: #fefefe;
+      background-color: var(--bg-color);
       color: #050505;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: var(--font-family);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -29,34 +41,74 @@
       user-select: none;
     }
 
-    .canvas-container {
+    /* Outer Presentation Stage: 960x960 maximum bounds matching original video */
+    .viewport-canvas {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      height: 600px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 36px;
+      justify-content: center;
     }
 
-    /* Outer Stage: centers capsule and button */
+    /* Container for the interacting group */
     .interaction-stage {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 64px;
       position: relative;
+      /* Full scale defaults: based on 144px height */
+      --stage-h: 120px;
+      --cap-failed-w: 372px;
+      --cap-syncing-w: 308px;
+      --btn-size: 120px;
+      --gap: 22px;
+      --font-size: 38px;
+      --icon-size: 46px;
+      --spinner-size: 38px;
+      --border-radius: 60px;
+      height: var(--stage-h);
+      transition: all 0.3s ease;
     }
 
-    /* Pill-shaped Capsule: matches 442x144 ratio (3.07) at height 64px -> width 196px */
+    /* Scaled modes */
+    .interaction-stage.scale-compact {
+      --stage-h: 64px;
+      --cap-failed-w: 196px;
+      --cap-syncing-w: 163px;
+      --btn-size: 64px;
+      --gap: 12px;
+      --font-size: 20px;
+      --icon-size: 24px;
+      --spinner-size: 20px;
+      --border-radius: 32px;
+    }
+
+    .interaction-stage.scale-original {
+      --stage-h: 144px;
+      --cap-failed-w: 442px;
+      --cap-syncing-w: 364px;
+      --btn-size: 144px;
+      --gap: 26px;
+      --font-size: 46px;
+      --icon-size: 54px;
+      --spinner-size: 45px;
+      --border-radius: 72px;
+    }
+
+    /* Pill-shaped Capsule */
     .capsule {
       position: relative;
-      height: 64px;
-      width: 196px;
-      border-radius: 32px;
-      background-color: #f4f4f4;
-      border: 1px solid #ebebeb;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+      height: var(--stage-h);
+      width: var(--cap-failed-w);
+      border-radius: var(--border-radius);
+      background-color: var(--failed-capsule-bg);
+      border: 1.5px solid var(--failed-capsule-border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
       display: flex;
       align-items: center;
-      padding: 0 20px 0 16px;
+      padding: 0 calc(var(--stage-h) * 0.28) 0 calc(var(--stage-h) * 0.24);
       overflow: hidden;
       cursor: default;
       transition: width 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -65,20 +117,20 @@
       will-change: width, transform;
     }
 
-    /* Syncing State: width scales to 163px based on 367x144 ratio (2.55) */
+    /* Syncing State of Capsule */
     .capsule.syncing {
-      width: 163px;
-      background-color: #f5f5f5;
-      border-color: #e8e8e8;
+      width: var(--cap-syncing-w);
+      background-color: var(--syncing-capsule-bg);
+      border-color: var(--syncing-capsule-border);
     }
 
-    /* Icon slot inside capsule */
+    /* Icon Slot inside capsule */
     .icon-slot {
       position: relative;
-      width: 24px;
-      height: 24px;
+      width: var(--icon-size);
+      height: var(--icon-size);
       flex-shrink: 0;
-      margin-right: 12px;
+      margin-right: calc(var(--stage-h) * 0.16);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -96,9 +148,8 @@
     }
 
     .octagon-svg {
-      width: 24px;
-      height: 24px;
-      filter: drop-shadow(0 1.5px 3px rgba(252, 53, 41, 0.22));
+      width: 100%;
+      height: 100%;
     }
 
     .capsule.syncing .octagon-icon {
@@ -126,8 +177,8 @@
     }
 
     .spinner-svg {
-      width: 21px;
-      height: 21px;
+      width: var(--spinner-size);
+      height: var(--spinner-size);
       animation: spin-chase 1.05s steps(8, end) infinite;
     }
 
@@ -139,7 +190,7 @@
     /* Text Container */
     .text-slot {
       position: relative;
-      height: 22px;
+      height: calc(var(--stage-h) * 0.42);
       display: flex;
       align-items: center;
       flex-grow: 1;
@@ -149,9 +200,9 @@
     .status-text {
       position: absolute;
       left: 0;
-      font-size: 16px;
+      font-size: var(--font-size);
       font-weight: 700;
-      letter-spacing: -0.022em;
+      letter-spacing: -0.024em;
       white-space: nowrap;
       transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
                   transform 0.44s cubic-bezier(0.34, 1.4, 0.64, 1),
@@ -159,7 +210,7 @@
     }
 
     .text-failed {
-      color: #fc3529;
+      color: var(--failed-red);
       opacity: 1;
       transform: translateY(0);
       filter: blur(0px);
@@ -167,16 +218,16 @@
 
     .capsule.syncing .text-failed {
       opacity: 0;
-      transform: translateY(-14px) scale(0.92);
-      filter: blur(3px);
+      transform: translateY(-20px) scale(0.92);
+      filter: blur(4px);
       pointer-events: none;
     }
 
     .text-syncing {
-      color: #080808;
+      color: var(--syncing-text);
       opacity: 0;
-      transform: translateY(14px) scale(0.92);
-      filter: blur(3px);
+      transform: translateY(20px) scale(0.92);
+      filter: blur(4px);
     }
 
     .capsule.syncing .text-syncing {
@@ -191,8 +242,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-left: 12px; /* Gap = 26/144 * 64px = 11.5px */
-      width: 64px;
+      margin-left: var(--gap);
+      width: var(--btn-size);
       transition: width 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
                   margin-left 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
                   opacity 0.36s ease;
@@ -207,17 +258,17 @@
     }
 
     .retry-btn {
-      width: 64px;
-      height: 64px;
+      width: var(--btn-size);
+      height: var(--btn-size);
       border-radius: 50%;
-      background-color: #000000;
+      background-color: var(--btn-black);
       border: none;
       outline: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.06);
       transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
                   box-shadow 0.2s ease,
                   background-color 0.2s ease;
@@ -226,13 +277,13 @@
 
     .retry-btn:hover {
       background-color: #171717;
-      transform: scale(1.04);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+      transform: scale(1.03);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
     }
 
-    .retry-btn:active {
-      transform: scale(0.90);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    .retry-btn:active, .retry-btn.pressed {
+      transform: scale(0.91);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
     .button-slot.hidden .retry-btn {
@@ -240,11 +291,11 @@
     }
 
     .retry-icon-svg {
-      width: 24px;
-      height: 24px;
+      width: calc(var(--btn-size) * 0.38);
+      height: calc(var(--btn-size) * 0.38);
       fill: none;
       stroke: #ffffff;
-      stroke-width: 3.2;
+      stroke-width: 3.4;
       stroke-linecap: round;
       stroke-linejoin: round;
       transition: transform 0.3s ease;
@@ -254,25 +305,44 @@
       transform: rotate(35deg);
     }
 
-    /* Controller Panel */
-    .controls-tray {
-      margin-top: 40px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 16px;
-      border-radius: 999px;
-      background: #ffffff;
-      border: 1px solid #e5e5e5;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-      font-size: 13px;
-      color: #666;
+    /* Realistic Animated Cursor (macOS pointer overlay) */
+    .simulated-cursor {
+      position: absolute;
+      width: 28px;
+      height: 38px;
+      pointer-events: none;
+      z-index: 100;
+      transform: translate(620px, 480px);
+      opacity: 0;
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
     }
 
-    .controls-tray button {
+    .simulated-cursor.visible {
+      opacity: 1;
+    }
+
+    /* Control Tray */
+    .controls-panel {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid #e7e7e7;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      font-size: 13px;
+      color: #555;
+    }
+
+    .controls-panel button {
       background: #f4f4f4;
-      border: 1px solid #e0e0e0;
-      padding: 6px 14px;
+      border: 1px solid #dfdfdf;
+      padding: 7px 16px;
       border-radius: 999px;
       font-size: 13px;
       font-weight: 600;
@@ -281,59 +351,79 @@
       transition: all 0.15s ease;
     }
 
-    .controls-tray button:hover {
-      background: #e9e9e9;
+    .controls-panel button:hover {
+      background: #eaeaea;
       color: #000;
+    }
+
+    .controls-panel button.active {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     .badge-info {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       font-weight: 500;
+      margin-right: 8px;
     }
 
     .pulse-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #fc3529;
+      background: var(--failed-red);
       transition: background 0.3s ease;
     }
 
     .pulse-dot.active {
       background: #10b981;
     }
+
+    .meta-credits {
+      margin-top: 18px;
+      font-size: 13px;
+      color: #888;
+      text-align: center;
+    }
+
+    .meta-credits a {
+      color: #111;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="canvas-container">
+  <div class="viewport-canvas">
     <div class="interaction-stage" id="stage">
       
-      <!-- Pill Capsule -->
+      <!-- Pill-shaped Capsule -->
       <div class="capsule" id="capsule">
         <div class="icon-slot">
-          <!-- Red Octagon with Exclamation (Exact stop sign geometry) -->
+          <!-- Red Octagon Stop-Sign with Exclamation Mark -->
           <div class="octagon-icon" id="octagonIcon">
-            <svg class="octagon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12.5 3.5H27.5L36.5 12.5V27.5L27.5 36.5H12.5L3.5 27.5V12.5L12.5 3.5Z" fill="#FC3529" stroke="#E62A1F" stroke-width="1.5" stroke-linejoin="round"/>
-              <path d="M20 12V22" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round"/>
-              <circle cx="20" cy="28.5" r="2" fill="#FFFFFF"/>
+            <svg class="octagon-svg" viewBox="0 0 55 53" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 2H39L53 16V37L39 51H16L2 37V16L16 2Z" fill="#FD332D" stroke="#E62822" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M27.5 15V29" stroke="#FFFFFF" stroke-width="4.4" stroke-linecap="round"/>
+              <circle cx="27.5" cy="37.5" r="2.8" fill="#FFFFFF"/>
             </svg>
           </div>
 
-          <!-- Dotted Chase Spinner (Exact 8-dot step gradient) -->
+          <!-- Dotted Chase Spinner (8 dots stepping in opacity) -->
           <div class="spinner-icon" id="spinnerIcon">
-            <svg class="spinner-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="16" cy="4" r="2.2" fill="#111111" fill-opacity="1.0"/>
-              <circle cx="24.48" cy="7.51" r="2.2" fill="#111111" fill-opacity="0.87"/>
-              <circle cx="28" cy="16" r="2.2" fill="#111111" fill-opacity="0.75"/>
-              <circle cx="24.48" cy="24.48" r="2.2" fill="#111111" fill-opacity="0.62"/>
-              <circle cx="16" cy="28" r="2.2" fill="#111111" fill-opacity="0.50"/>
-              <circle cx="7.51" cy="24.48" r="2.2" fill="#111111" fill-opacity="0.37"/>
-              <circle cx="4" cy="16" r="2.2" fill="#111111" fill-opacity="0.25"/>
-              <circle cx="7.51" cy="7.51" r="2.2" fill="#111111" fill-opacity="0.12"/>
+            <svg class="spinner-svg" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="22.5" cy="5.5" r="3.2" fill="#000000" fill-opacity="1.00"/>
+              <circle cx="34.5" cy="10.5" r="3.2" fill="#000000" fill-opacity="0.87"/>
+              <circle cx="39.5" cy="22.5" r="3.2" fill="#000000" fill-opacity="0.75"/>
+              <circle cx="34.5" cy="34.5" r="3.2" fill="#000000" fill-opacity="0.62"/>
+              <circle cx="22.5" cy="39.5" r="3.2" fill="#000000" fill-opacity="0.50"/>
+              <circle cx="10.5" cy="34.5" r="3.2" fill="#000000" fill-opacity="0.37"/>
+              <circle cx="5.5" cy="22.5" r="3.2" fill="#000000" fill-opacity="0.25"/>
+              <circle cx="10.5" cy="10.5" r="3.2" fill="#000000" fill-opacity="0.12"/>
             </svg>
           </div>
         </div>
@@ -347,7 +437,7 @@
       <!-- Circular Black Retry Button -->
       <div class="button-slot" id="buttonSlot">
         <button class="retry-btn" id="retryBtn" aria-label="Retry Sync">
-          <!-- Exact circular arrow geometry matching frame_001 -->
+          <!-- White clockwise arrow icon -->
           <svg class="retry-icon-svg" viewBox="0 0 24 24">
             <path d="M21 12a9 9 0 1 1-2.63-6.36L21 8"/>
             <polyline points="21 3 21 8 16 8"/>
@@ -357,15 +447,27 @@
 
     </div>
 
-    <!-- Interactive control tray -->
-    <div class="controls-tray">
-      <div class="badge-info">
-        <span class="pulse-dot" id="stateDot"></span>
-        <span id="stateLabel">State: Sync Failed</span>
-      </div>
-      <button id="triggerBtn">Simulate Click</button>
-      <button id="autoLoopBtn">Toggle Auto Loop</button>
+    <!-- macOS Pointer SVG for realistic simulation -->
+    <svg class="simulated-cursor" id="simCursor" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 1L9.5 24L13.5 16L21.5 14L1 1Z" fill="#1C1C1E" stroke="#FFFFFF" stroke-width="1.8" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- Interactive Controls Panel -->
+  <div class="controls-panel">
+    <div class="badge-info">
+      <span class="pulse-dot" id="stateDot"></span>
+      <span id="stateLabel">State: Sync Failed</span>
     </div>
+
+    <button id="triggerBtn">Click Retry</button>
+    <button id="replayDemoBtn">Replay Video Demo</button>
+    <button id="scaleBtn">Scale: Medium (120px)</button>
+    <button id="autoLoopBtn">Auto Loop: OFF</button>
+  </div>
+
+  <div class="meta-credits">
+    Based on contextual feedback interaction by <a href="https://x.com/nitishkmrk/status/2083103451719025094" target="_blank" rel="noopener">Nitish Khagwal (@nitishkmrk)</a>.
   </div>
 
   <script>
@@ -378,14 +480,19 @@
     let currentState = STATES.FAILED;
     let autoLoop = false;
     let autoLoopTimer = null;
+    let currentScale = 'medium'; // 'compact' (64px), 'medium' (120px), 'original' (144px)
 
+    const stage = document.getElementById('stage');
     const capsule = document.getElementById('capsule');
     const buttonSlot = document.getElementById('buttonSlot');
     const retryBtn = document.getElementById('retryBtn');
     const stateDot = document.getElementById('stateDot');
     const stateLabel = document.getElementById('stateLabel');
     const triggerBtn = document.getElementById('triggerBtn');
+    const replayDemoBtn = document.getElementById('replayDemoBtn');
+    const scaleBtn = document.getElementById('scaleBtn');
     const autoLoopBtn = document.getElementById('autoLoopBtn');
+    const simCursor = document.getElementById('simCursor');
 
     function setState(nextState) {
       if (currentState === nextState) return;
@@ -397,11 +504,12 @@
         stateDot.classList.add('active');
         stateLabel.textContent = 'State: Syncing...';
 
+        // Revert back to FAILED after holding for 2.6s (exact timing in video)
         setTimeout(() => {
           if (currentState === STATES.SYNCING) {
             setState(STATES.FAILED);
           }
-        }, 3200);
+        }, 2600);
 
       } else {
         capsule.classList.remove('syncing');
@@ -422,24 +530,78 @@
 
     function triggerRetry() {
       if (currentState === STATES.SYNCING) return;
-      retryBtn.style.transform = 'scale(0.88)';
+      retryBtn.classList.add('pressed');
       setTimeout(() => {
-        retryBtn.style.transform = '';
+        retryBtn.classList.remove('pressed');
         setState(STATES.SYNCING);
-      }, 150);
+      }, 140);
     }
 
     retryBtn.addEventListener('click', triggerRetry);
     triggerBtn.addEventListener('click', triggerRetry);
 
+    // Auto loop toggle
     autoLoopBtn.addEventListener('click', () => {
       autoLoop = !autoLoop;
-      autoLoopBtn.textContent = autoLoop ? 'Auto Loop: ON' : 'Toggle Auto Loop';
-      autoLoopBtn.style.backgroundColor = autoLoop ? '#000' : '';
-      autoLoopBtn.style.color = autoLoop ? '#fff' : '';
+      autoLoopBtn.textContent = autoLoop ? 'Auto Loop: ON' : 'Auto Loop: OFF';
+      autoLoopBtn.classList.toggle('active', autoLoop);
       if (autoLoop && currentState === STATES.FAILED) {
         triggerRetry();
       }
+    });
+
+    // Scale switcher: Compact (64px) -> Medium (120px) -> Original (144px)
+    scaleBtn.addEventListener('click', () => {
+      stage.classList.remove('scale-compact', 'scale-original');
+      if (currentScale === 'medium') {
+        currentScale = 'original';
+        stage.classList.add('scale-original');
+        scaleBtn.textContent = 'Scale: Original (144px)';
+      } else if (currentScale === 'original') {
+        currentScale = 'compact';
+        stage.classList.add('scale-compact');
+        scaleBtn.textContent = 'Scale: Compact (64px)';
+      } else {
+        currentScale = 'medium';
+        scaleBtn.textContent = 'Scale: Medium (120px)';
+      }
+    });
+
+    // Replay full video demo choreography with simulated cursor
+    replayDemoBtn.addEventListener('click', () => {
+      if (currentState === STATES.SYNCING) {
+        setState(STATES.FAILED);
+      }
+
+      // Position cursor at bottom right
+      const rect = retryBtn.getBoundingClientRect();
+      const canvasRect = document.querySelector('.viewport-canvas').getBoundingClientRect();
+      
+      const targetX = rect.left - canvasRect.left + rect.width / 2;
+      const targetY = rect.top - canvasRect.top + rect.height / 2;
+
+      simCursor.style.transform = `translate(${targetX + 140}px, ${targetY + 180}px)`;
+      simCursor.classList.add('visible');
+
+      // Move cursor to button
+      setTimeout(() => {
+        simCursor.style.transform = `translate(${targetX}px, ${targetY}px)`;
+      }, 200);
+
+      // Click button
+      setTimeout(() => {
+        triggerRetry();
+      }, 750);
+
+      // Cursor moves away
+      setTimeout(() => {
+        simCursor.style.transform = `translate(${targetX + 120}px, ${targetY + 160}px)`;
+      }, 1050);
+
+      // Hide cursor
+      setTimeout(() => {
+        simCursor.classList.remove('visible');
+      }, 1700);
     });
   </script>
 </body>
