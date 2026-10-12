@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sync Status Micro-interaction</title>
+  <title>Sync Status Micro-interaction (Refined Parity)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     body {
       background-color: #fefefe;
-      color: #111;
+      color: #050505;
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
       display: flex;
@@ -32,82 +33,81 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 32px;
+      gap: 36px;
     }
 
-    /* Outer Row holding Capsule and Retry Button */
+    /* Outer Stage: centers capsule and button */
     .interaction-stage {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 72px;
+      height: 64px;
       position: relative;
     }
 
-    /* Pill-shaped Capsule */
+    /* Pill-shaped Capsule: matches 442x144 ratio (3.07) at height 64px -> width 196px */
     .capsule {
       position: relative;
-      height: 72px;
-      width: 213px; /* Default width in idle state */
-      border-radius: 36px;
+      height: 64px;
+      width: 196px;
+      border-radius: 32px;
       background-color: #f4f4f4;
-      border: 1.5px solid #ececec;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+      border: 1px solid #ebebeb;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
       display: flex;
       align-items: center;
-      padding: 0 24px 0 20px;
+      padding: 0 20px 0 16px;
       overflow: hidden;
       cursor: default;
-      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  background-color 0.4s ease,
-                  border-color 0.4s ease,
-                  box-shadow 0.4s ease;
+      transition: width 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  background-color 0.35s ease,
+                  border-color 0.35s ease;
       will-change: width, transform;
     }
 
+    /* Syncing State: width scales to 163px based on 367x144 ratio (2.55) */
     .capsule.syncing {
-      width: 184px;
+      width: 163px;
       background-color: #f5f5f5;
-      border-color: #e9e9e9;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      border-color: #e8e8e8;
     }
 
     /* Icon slot inside capsule */
     .icon-slot {
       position: relative;
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       flex-shrink: 0;
-      margin-right: 14px;
+      margin-right: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* Red Octagon Stop-Sign */
+    /* Octagon Stop Sign */
     .octagon-icon {
       position: absolute;
       inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                  transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.46s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .octagon-svg {
-      width: 28px;
-      height: 28px;
-      filter: drop-shadow(0 2px 4px rgba(252, 53, 41, 0.25));
+      width: 24px;
+      height: 24px;
+      filter: drop-shadow(0 1.5px 3px rgba(252, 53, 41, 0.22));
     }
 
     .capsule.syncing .octagon-icon {
       opacity: 0;
-      transform: scale(0.4) rotate(-45deg);
+      transform: scale(0.35) rotate(-55deg);
       pointer-events: none;
     }
 
-    /* Dotted Spinner Icon */
+    /* 8-Dot Chase Spinner */
     .spinner-icon {
       position: absolute;
       inset: 0;
@@ -115,9 +115,9 @@
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transform: scale(0.4) rotate(45deg);
-      transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                  transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: scale(0.35) rotate(55deg);
+      transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.46s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .capsule.syncing .spinner-icon {
@@ -126,8 +126,8 @@
     }
 
     .spinner-svg {
-      width: 24px;
-      height: 24px;
+      width: 21px;
+      height: 21px;
       animation: spin-chase 1.05s steps(8, end) infinite;
     }
 
@@ -136,10 +136,10 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Typography inside capsule */
+    /* Text Container */
     .text-slot {
       position: relative;
-      height: 24px;
+      height: 22px;
       display: flex;
       align-items: center;
       flex-grow: 1;
@@ -149,13 +149,13 @@
     .status-text {
       position: absolute;
       left: 0;
-      font-size: 19px;
+      font-size: 16px;
       font-weight: 700;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.022em;
       white-space: nowrap;
-      transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                  transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1),
-                  filter 0.35s ease;
+      transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.44s cubic-bezier(0.34, 1.4, 0.64, 1),
+                  filter 0.32s ease;
     }
 
     .text-failed {
@@ -167,16 +167,16 @@
 
     .capsule.syncing .text-failed {
       opacity: 0;
-      transform: translateY(-16px) scale(0.92);
-      filter: blur(4px);
+      transform: translateY(-14px) scale(0.92);
+      filter: blur(3px);
       pointer-events: none;
     }
 
     .text-syncing {
-      color: #0d0d0d;
+      color: #080808;
       opacity: 0;
-      transform: translateY(16px) scale(0.92);
-      filter: blur(4px);
+      transform: translateY(14px) scale(0.92);
+      filter: blur(3px);
     }
 
     .capsule.syncing .text-syncing {
@@ -185,17 +185,17 @@
       filter: blur(0px);
     }
 
-    /* Retry Button (Black Circle) */
+    /* Circular Retry Button */
     .button-slot {
       position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-left: 14px;
-      width: 72px;
-      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  margin-left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  opacity 0.4s ease;
+      margin-left: 12px; /* Gap = 26/144 * 64px = 11.5px */
+      width: 64px;
+      transition: width 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  margin-left 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  opacity 0.36s ease;
       will-change: width, margin-left;
     }
 
@@ -207,8 +207,8 @@
     }
 
     .retry-btn {
-      width: 72px;
-      height: 72px;
+      width: 64px;
+      height: 64px;
       border-radius: 50%;
       background-color: #000000;
       border: none;
@@ -217,7 +217,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.08);
       transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
                   box-shadow 0.2s ease,
                   background-color 0.2s ease;
@@ -225,14 +225,14 @@
     }
 
     .retry-btn:hover {
-      background-color: #1a1a1a;
+      background-color: #171717;
       transform: scale(1.04);
-      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.22);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
     }
 
     .retry-btn:active {
       transform: scale(0.90);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     }
 
     .button-slot.hidden .retry-btn {
@@ -240,8 +240,8 @@
     }
 
     .retry-icon-svg {
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       fill: none;
       stroke: #ffffff;
       stroke-width: 3.2;
@@ -254,9 +254,9 @@
       transform: rotate(35deg);
     }
 
-    /* Simulation Control Tray */
+    /* Controller Panel */
     .controls-tray {
-      margin-top: 48px;
+      margin-top: 40px;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -314,7 +314,7 @@
       <!-- Pill Capsule -->
       <div class="capsule" id="capsule">
         <div class="icon-slot">
-          <!-- Red Octagon with Exclamation -->
+          <!-- Red Octagon with Exclamation (Exact stop sign geometry) -->
           <div class="octagon-icon" id="octagonIcon">
             <svg class="octagon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12.5 3.5H27.5L36.5 12.5V27.5L27.5 36.5H12.5L3.5 27.5V12.5L12.5 3.5Z" fill="#FC3529" stroke="#E62A1F" stroke-width="1.5" stroke-linejoin="round"/>
@@ -323,10 +323,9 @@
             </svg>
           </div>
 
-          <!-- Dotted Chase Spinner -->
+          <!-- Dotted Chase Spinner (Exact 8-dot step gradient) -->
           <div class="spinner-icon" id="spinnerIcon">
             <svg class="spinner-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- 8 Dots with stepping opacities around circle -->
               <circle cx="16" cy="4" r="2.2" fill="#111111" fill-opacity="1.0"/>
               <circle cx="24.48" cy="7.51" r="2.2" fill="#111111" fill-opacity="0.87"/>
               <circle cx="28" cy="16" r="2.2" fill="#111111" fill-opacity="0.75"/>
@@ -348,6 +347,7 @@
       <!-- Circular Black Retry Button -->
       <div class="button-slot" id="buttonSlot">
         <button class="retry-btn" id="retryBtn" aria-label="Retry Sync">
+          <!-- Exact circular arrow geometry matching frame_001 -->
           <svg class="retry-icon-svg" viewBox="0 0 24 24">
             <path d="M21 12a9 9 0 1 1-2.63-6.36L21 8"/>
             <polyline points="21 3 21 8 16 8"/>
@@ -369,7 +369,7 @@
   </div>
 
   <script>
-    // Domain Model: Finite State Machine
+    // Finite state machine
     const STATES = {
       FAILED: 'FAILED',
       SYNCING: 'SYNCING'
@@ -379,7 +379,6 @@
     let autoLoop = false;
     let autoLoopTimer = null;
 
-    // DOM Elements
     const capsule = document.getElementById('capsule');
     const buttonSlot = document.getElementById('buttonSlot');
     const retryBtn = document.getElementById('retryBtn');
@@ -393,13 +392,11 @@
       currentState = nextState;
 
       if (currentState === STATES.SYNCING) {
-        // Morph capsule to Syncing state
         capsule.classList.add('syncing');
         buttonSlot.classList.add('hidden');
         stateDot.classList.add('active');
         stateLabel.textContent = 'State: Syncing...';
 
-        // Revert back to FAILED after holding for 3.2s
         setTimeout(() => {
           if (currentState === STATES.SYNCING) {
             setState(STATES.FAILED);
@@ -407,7 +404,6 @@
         }, 3200);
 
       } else {
-        // Morph capsule back to Failed state with elastic bounce
         capsule.classList.remove('syncing');
         buttonSlot.classList.remove('hidden');
         stateDot.classList.remove('active');
@@ -426,7 +422,6 @@
 
     function triggerRetry() {
       if (currentState === STATES.SYNCING) return;
-      // Spring press animation
       retryBtn.style.transform = 'scale(0.88)';
       setTimeout(() => {
         retryBtn.style.transform = '';
